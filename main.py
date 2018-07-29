@@ -1,7 +1,11 @@
 from Adafruit_IO import Client, Data
 from datetime import date
+from datetime import datetime
 from datetime import timedelta
 from csv import DictReader
+from astral import Astral
+from pytz import timezone
+import pytz
 import csv
 import os
 import urllib.request
@@ -11,10 +15,28 @@ ADAFRUIT_KEY = os.environ['AIO_KEY']
 ADAFRUIT_PUMP_FEED = os.environ['AIO_PUMP_FEED']
 PRECIPITATION_DAYS = int(os.environ['PRECIPITATION_DAYS'])
 PRECIPITATION_SKIP = int(os.environ['PRECIPITATION_SKIP'])
+WATERING_DURATION = int(os.environ['WATERING_DURATION'])
+CLIMATE_CITY = os.environ['CLIMATE_CITY']
 CLIMATE_STATION_ID = os.environ["CLIMATE_STATION_ID"]
 CLIMATE_CSV_URL = ("http://climate.weather.gc.ca/climate_data/bulk_data_e.html"
                    "?format=csv&stationID={}&Year={}&timeframe=2"
                    .format(CLIMATE_STATION_ID, date.today().year))
+
+
+def is_watering_period():
+    a = Astral()
+    a.solar_depression = 'civil'
+    city = a[CLIMATE_CITY]
+    sun = city.sun(date=date.today(), local=True)
+    current_time = timezone(city.timezone).localize(datetime.now())
+    watering_duration = timedelta(minutes=WATERING_DURATION)
+    # Start watering n minutes before dawn
+    period_start = sun['dawn'] - watering_duration
+    # Stop at dawn
+    period_end = sun['dawn']
+    print("Watering target period is from {:%H:%M} to {:%H:%M}".format(period_start, period_end))
+
+    return current_time > period_start and current_time < period_end
 
 
 def climate_csv():
@@ -52,8 +74,8 @@ total_precipitation = 0.0
 check_dates = last_few_days(days=PRECIPITATION_DAYS)
 csv = climate_csv()
 for row in csv:
-    date = row["Date/Time"]
-    if date not in check_dates:
+    row_date = row["Date/Time"]
+    if row_date not in check_dates:
         continue
 
     precipitation = row["Total Precip (mm)"]
@@ -69,5 +91,10 @@ print(summary.format(len(check_dates), total_precipitation))
 if total_precipitation > PRECIPITATION_SKIP:
     print("Skip watering for today (more than {}mm).".format(PRECIPITATION_SKIP))
 else:
-    print("Trigger watering today (less than {}mm).".format(PRECIPITATION_SKIP))
-    aio_start_watering()
+    print("Will be watering today (less than {}mm).".format(PRECIPITATION_SKIP))
+
+    if is_watering_period():
+        print("Watering NOW!")
+        aio_start_watering()
+    else:
+        print("Not watering right now, outside target period.")
