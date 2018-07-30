@@ -36,9 +36,10 @@ def handler(event, context):
 
         if is_watering_period():
             print("Watering NOW!")
-            aio_start_watering()
+            aio_set_pump(1)
         else:
             print("Not watering right now, outside target period.")
+            aio_set_pump(0)
 
 
 def total_precipitation(dates):
@@ -100,6 +101,6 @@ def last_few_days(days=None):
     return last_n_days
 
 
-def aio_start_watering():
+def aio_set_pump(state):
     aio = Client(ADAFRUIT_USERNAME, ADAFRUIT_KEY)
-    aio.create_data(ADAFRUIT_PUMP_FEED, Data(value=1))
+    aio.create_data(ADAFRUIT_PUMP_FEED, Data(value=state))
