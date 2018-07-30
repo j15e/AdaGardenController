@@ -20,7 +20,7 @@ resource "aws_lambda_function" "ada_garden_controller" {
 resource "aws_cloudwatch_event_rule" "every_morning" {
   name                = "every-morning"
   description         = "Fires every minute every morning between 3AM and 10AM."
-  schedule_expression = "cron(* 3,4,5,6,7,8,9,10 ? * * *)"
+  schedule_expression = "cron(* 7,8,9,10,11,12,13,14 ? * * *)"
 }
 
 resource "aws_cloudwatch_event_target" "check_watering_every_morning" {
