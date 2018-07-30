@@ -64,7 +64,7 @@ def is_watering_period():
     a.solar_depression = 'civil'
     city = a[CLIMATE_CITY]
     sun = city.sun(date=date.today(), local=True)
-    current_time = timezone(city.timezone).localize(datetime.now())
+    current_time = datetime.now(tz=timezone(city.timezone))
     watering_duration = timedelta(minutes=WATERING_DURATION)
     # Start watering n minutes before dawn
     period_start = sun['dawn'] - watering_duration
