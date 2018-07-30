@@ -1,3 +1,15 @@
+# AdaGardenController
+
+This pythons script controller when to water a garden. 
+
+It uses historical precipitation data from [Weather Canada](http://climate.weather.gc.ca/) 
+and sun position from the [astral](https://github.com/sffjunkie/astral/) library.
+
+The script emits an on/off state to Adafruit IO feed, and the pump act accordingly.
+
+See [AdaGarden](https://github.com/j15e/AdaGarden) for the Arduino system controlling 
+the pump switch.
+
 ## Quick start
 
 Requires python 3.6+ and virtualenv.
@@ -6,7 +18,13 @@ Requires python 3.6+ and virtualenv.
     source venv/bin/activate
     pip install -r requirements.txt
 
-## Deploy infrastructure setup
+## Deploy script updates
+
+    make package && make deploy
+
+## Terraform setup
+
+Setup the AWS Lambda & other requirements (scheduler, role, etc) with terraform.
 
     cd terraform
     export AWS_ACCESS_KEY_ID="anaccesskey"
@@ -16,11 +34,9 @@ Requires python 3.6+ and virtualenv.
     terraform plan
     terraform apply
 
-## Deploy script updates
+## Environment variables (AWS Lambda)
 
-    make package && make deploy
-
-## Required environment variables
+Put configurations specifics to the python controller in `terraform/terraform.tfvars`.
 
 ```
 # Adafruit.io account keys
