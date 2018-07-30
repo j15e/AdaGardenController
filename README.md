@@ -1,3 +1,25 @@
+## Quick start
+
+Requires python 3.6+ and virtualenv.
+
+    virtualenv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+
+## Deploy infrastructure setup
+
+    cd terraform
+    export AWS_ACCESS_KEY_ID="anaccesskey"
+    export AWS_SECRET_ACCESS_KEY="asecretkey"
+    export AWS_DEFAULT_REGION="us-east-1"
+    terraform init
+    terraform plan
+    terraform apply
+
+## Deploy script updates
+
+    make package && make deploy
+
 ## Required environment variables
 
 ```

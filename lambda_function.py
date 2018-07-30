@@ -23,6 +23,41 @@ CLIMATE_CSV_URL = ("http://climate.weather.gc.ca/climate_data/bulk_data_e.html"
                    .format(CLIMATE_STATION_ID, date.today().year))
 
 
+def handler(event, context):
+    check_dates = last_few_days(days=PRECIPITATION_DAYS)
+    precipitation = total_precipitation(check_dates)
+    summary = "Total precipitation in past {0:d} days : {1:.2f}mm"
+    print(summary.format(len(check_dates), precipitation))
+
+    if precipitation > PRECIPITATION_SKIP:
+        print("Skip watering for today (more than {}mm).".format(PRECIPITATION_SKIP))
+    else:
+        print("Will be watering today (less than {}mm).".format(PRECIPITATION_SKIP))
+
+        if is_watering_period():
+            print("Watering NOW!")
+            aio_start_watering()
+        else:
+            print("Not watering right now, outside target period.")
+
+
+def total_precipitation(dates):
+    total_precipitation = 0.0
+    csv = climate_csv()
+    for row in csv:
+        row_date = row["Date/Time"]
+        if row_date not in dates:
+            continue
+
+        precipitation = row["Total Precip (mm)"]
+        if not precipitation:
+            continue
+
+        total_precipitation += float(precipitation)
+
+    return total_precipitation
+
+
 def is_watering_period():
     a = Astral()
     a.solar_depression = 'civil'
@@ -68,33 +103,3 @@ def last_few_days(days=None):
 def aio_start_watering():
     aio = Client(ADAFRUIT_USERNAME, ADAFRUIT_KEY)
     aio.create_data(ADAFRUIT_PUMP_FEED, Data(value=1))
-
-
-total_precipitation = 0.0
-check_dates = last_few_days(days=PRECIPITATION_DAYS)
-csv = climate_csv()
-for row in csv:
-    row_date = row["Date/Time"]
-    if row_date not in check_dates:
-        continue
-
-    precipitation = row["Total Precip (mm)"]
-    if not precipitation:
-        continue
-
-    total_precipitation += float(precipitation)
-
-summary = "Total precipitation in past {0:d} days : {1:.2f}mm"
-print(summary.format(len(check_dates), total_precipitation))
-
-
-if total_precipitation > PRECIPITATION_SKIP:
-    print("Skip watering for today (more than {}mm).".format(PRECIPITATION_SKIP))
-else:
-    print("Will be watering today (less than {}mm).".format(PRECIPITATION_SKIP))
-
-    if is_watering_period():
-        print("Watering NOW!")
-        aio_start_watering()
-    else:
-        print("Not watering right now, outside target period.")
