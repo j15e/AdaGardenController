@@ -17,6 +17,9 @@ Requires python 3.6+ and virtualenv.
     virtualenv venv
     source venv/bin/activate
     pip install -r requirements.txt
+    python main.py
+
+The `main.py` is there only to test the lambda function handler locally.
 
 ## Deploy script updates
 
