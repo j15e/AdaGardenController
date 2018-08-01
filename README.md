@@ -42,25 +42,23 @@ Setup the AWS Lambda & other requirements (scheduler, role, etc) with terraform.
 Put configurations specifics to the python controller in `terraform/terraform.tfvars`.
 
 ```
-# Adafruit.io account keys
-AIO_USERNAME=
-AIO_KEY=
+# terraform.tfvars
 
-# Adafruit feed to trigger watering
-AIO_PUMP_FEED=garden-pump-staging
-
-# Number of past days to check precipitations
-PRECIPITATION_DAYS=2
-
-# Total precipitation to skip watering
-PRECIPITATION_SKIP=20
-
-# Duration of watering in minutes
-WATERING_DURATION=30
-
-# Weater.gc.ca climate station ID to check
-CLIMATE_STATION_ID=27803
-
-# City name to check dawn time
-CLIMATE_CITY=Quebec
+lambba_env = {
+  # Adafruit.io account keys
+  "AIO_USERNAME" = ""
+  "AIO_KEY" = ""
+  # Adafruit feed to trigger watering (0/1 feed)
+  "AIO_PUMP_FEED" = "garden-pump"
+  # Number of past days to check past precipitations
+  "PRECIPITATION_DAYS" = "2"
+  # Total precipitation to skip watering
+  "PRECIPITATION_SKIP" = "20"
+  # Feed with watering duration (integer value in minutes)
+  WATERING_DURATION_FEED = "garden-watering-duration"
+  # Weater.gc.ca climate station ID to check
+  "CLIMATE_STATION_ID" = "27803"
+  # City name to check dawn time
+  "CLIMATE_CITY" = "Quebec"
+}
 ```
