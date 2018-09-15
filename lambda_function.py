@@ -36,12 +36,14 @@ def handler(event, context):
     else:
         print("Will be watering {}min today (less than {}mm).".format(duration, PRECIPITATION_SKIP))
 
-        if is_watering_period(duration):
+        if is_watering_period(duration, 0):
             print("Watering NOW!")
+            aio_set_pump(aio, 1)
+        elif is_watering_period(duration, 5):
+            print("Stopping watering (up to 5 minutes after schedule)")
             aio_set_pump(aio, 1)
         else:
             print("Not watering right now, outside target period.")
-            aio_set_pump(aio, 0)
 
 
 def total_precipitation(dates):
@@ -61,7 +63,7 @@ def total_precipitation(dates):
     return total_precipitation
 
 
-def is_watering_period(duration):
+def is_watering_period(duration, end_delta):
     a = Astral()
     a.solar_depression = 'civil'
     city = a[CLIMATE_CITY]
@@ -74,7 +76,8 @@ def is_watering_period(duration):
     period_end = sun['dawn']
     print("Watering target period is from {:%H:%M} to {:%H:%M}".format(period_start, period_end))
 
-    return current_time > period_start and current_time < period_end
+    end_time = (period_end + timedelta(minutes=end_delta))
+    return current_time > period_start and current_time < end_time
 
 
 def climate_csv():
