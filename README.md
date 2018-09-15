@@ -16,6 +16,7 @@ Requires python 3.6+ and virtualenv.
 
     virtualenv venv
     source venv/bin/activate
+    source .env
     pip install -r requirements.txt
     python main.py
 
